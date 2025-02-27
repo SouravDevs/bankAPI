@@ -1,0 +1,12 @@
+[
+  {
+    "username": "jacob",
+    "password": "secret",
+    "name": "Jacob Binnie",
+    "accnum": 1001914453988,
+    "balance": 1500,
+    "mpin": 1234,
+    "phone": "1234567890",
+    "transdetails": []
+  }
+]
