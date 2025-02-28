@@ -4,8 +4,11 @@ import { writeFile } from "node:fs/promises";
 
 const router = express.Router();
 
+router.get('/', (req, res) => {
+    res.json({message: usersData})
+})
 
-router.get('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     const username = req.headers.username;
     const password = req.headers.password;
 
