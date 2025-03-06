@@ -4,7 +4,12 @@ import authRoutes from './Routes/auth.routes.js'
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    
+        origin: "http://localhost:5173", // Specify your frontend URL
+        credentials: true, // Allow cookies and authentication headers
+      })
+);
 
 app.use('/user', authRoutes)
 

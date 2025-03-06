@@ -9,76 +9,87 @@ router.get('/', (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-    const username = req.headers.username;
-    const password = req.headers.password;
-
-    // Check existing user
-    const user = usersData.find((user) => user.username === username)
+    
+    try {
+        const { email, password } = req.body;
+        // Check existing user
+    const user = usersData.find((user) => user.email === email)
 
 
     if (user) {
         if (user.password === password) {
-            res.json({ message: user })
+           return res.json({ message: user })
         }
         else {
-            res.json({ message: "Invalid credentials" })
+           return res.json({ message: "Invalid credentials" })
         }
     }
 
     else {
-        res.json({ message: "Invalid credentials" })
+       return res.json({ message: "Invalid credentials" })
+    }
+    } catch (error) {
+        return res.json({error: error.message})
     }
 })
 
 router.post('/signup', async (req, res) => {
-    const username = req.headers.username;
-    const password = req.headers.password;
+    
+     try {
+        const { email } = req.headers;
+        const { password } = req.headers;
+      
+ 
+        console.log(email, password);
+ 
+     const accnum = () => Math.floor(999999999999 + Math.random() * 77777777777);
+ 
+     // Check existing user
+     const user = usersData.find((user) => user.email === email)
+ 
+     if (user) {
+         return res.json({ message: "User already exists!" })
+     }
+ 
+     else {
+         usersData.push({
+             email,
+             password,
+             name: null,
+             accnum: accnum(),
+             balance: 0,
+             mpin: null,
+             phone: null,
+             transdetails: []
+ 
+         })
 
-    const accnum = () => Math.floor(999999999999 + Math.random() * 77777777777);
+         const data = {email, password}
+ 
+         try {
+             await writeFile("./usersDB.json", JSON.stringify(usersData))
+            return res.json(data)
+         } catch (error) {
+            return res.json({ error: error.message })
+         }
+     }
+    } 
+      catch (error) {
+        return res.json({error: error.message})
+     }
 
-    // Check existing user
-    const user = usersData.find((user) => user.username === username)
-
-    if (user) {
-        return res.json({ message: "User already exists!" })
     }
-
-    else {
-        usersData.push({
-            username,
-            password,
-            name: null,
-            accnum: accnum(),
-            balance: 0,
-            mpin: null,
-            phone: null,
-            transdetails: []
-
-        })
-
-        try {
-            await writeFile("./usersDB.json", JSON.stringify(usersData))
-            res.json({ message: "User Created!" })
-        } catch (error) {
-            res.json({ error: error.message })
-        }
-    }
-
-
-
-})
+)
 
 router.patch('/transfer', async (req, res) => {
     try {
-        const username = req.headers.username;
-        const receiveuser = req.headers.receiveuser;
-        const amount = req.headers.amount;
+       const {email, receiveuser, amount} = req.body;
 
         // Find User
-        const user = usersData.find((user) => user.username === username)
+        const user = usersData.find((user) => user.email === email)
 
         // Check valid Receive Customer
-        const receiver = usersData.find((user) => user.username === receiveuser)
+        const receiver = usersData.find((user) => user.email === receiveuser)
 
 
         if (receiver) {
@@ -97,7 +108,7 @@ router.patch('/transfer', async (req, res) => {
                     return res.json({ message: "Money Transferred Successfull" })
                 }
                 catch (error) {
-                    res.json({ error: error.message })
+                   return res.json({ error: error.message })
                 }
             }
             else {
@@ -106,23 +117,21 @@ router.patch('/transfer', async (req, res) => {
 
         }
         else {
-            res.json({ message: "Invalid Username" })
+           return res.json({ message: "Invalid Username" })
         }
     }
 
     catch (error) {
-        res.json({ error: error.message })
+       return res.json({ error: error.message })
     }
 })
 
 router.patch('/update/profile', async (req, res) => {
     try {
-        const username = req.headers.username;
-        const newname = req.headers.newname;
-        const newphone = req.headers.newphone;
+        const { email, newname, newphone} = req.body;
 
         // Find User
-        const user = usersData.find((user) => user.username === username)
+        const user = usersData.find((user) => user.email === email)
 
         // Update name & phone number
         user.name = newname;
@@ -131,13 +140,13 @@ router.patch('/update/profile', async (req, res) => {
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-            res.json({ message: "Profile Updated!" })
+           return res.json({ message: "Profile Updated!" })
         }
         catch (error) {
-            res.json({ error: error.message })
+           return res.json({ error: error.message })
         }
     } catch (error) {
-        res.json({ error: error.message })
+       return res.json({ error: error.message })
     }
 
 
@@ -145,11 +154,10 @@ router.patch('/update/profile', async (req, res) => {
 
 router.patch('/update/balance', async (req, res) => {
     try {
-        const username = req.headers.username;
-        const amount = req.headers.amount;
+       const { email, amount } = req.body;
 
         // Find User
-        const user = usersData.find((user) => user.username === username)
+        const user = usersData.find((user) => user.email === email)
 
         // Update name & phone number
         user.balance += Number(amount);
@@ -157,30 +165,24 @@ router.patch('/update/balance', async (req, res) => {
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-            res.json({ message: "Balance Updated!" })
+           return res.json({ message: "Balance Updated!" })
         }
         catch (error) {
-            res.json({ error: error.message })
+           return res.json({ error: error.message })
         }
     } catch (error) {
-        res.json({ error: error.message })
+       return res.json({ error: error.message })
     }
 })
 
 router.patch('/profile', async (req, res) => {
     try {
-        const username = req.headers.username;
+        const { email } = req.headers;
 
-
-        const balance = req.headers.balance;
-        const mpin = req.headers.mpin;
-        const phone = req.headers.phone;
-        const name = req.headers.name;
-
-
+        const { balance, mpin, phone, name } = req.headers;
 
         // Find User
-        const user = usersData.find((user) => user.username === username)
+        const user = usersData.find((user) => user.email === email)
 
         // Add profile details
         user.name = name
@@ -188,16 +190,18 @@ router.patch('/profile', async (req, res) => {
         user.mpin = Number(mpin)
         user.phone = phone
 
+        
+
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-            res.json({ message: "Profile Created!" })
+           return res.json({ message: "Profile Created!" })
         }
         catch (error) {
-            res.json({ error: error.message })
+           return res.json({ error: error.message })
         }
     } catch (error) {
-        res.json({ error: error.message })
+       return res.json({ error: error.message })
     }
 
 
@@ -205,24 +209,24 @@ router.patch('/profile', async (req, res) => {
 
 router.delete('/delete', async (req, res) => {
     try {
-        const username = req.headers.username;
+        const email = req.body.email;
 
         // Find User
-        const user = usersData.findIndex((user) => user.username === username)
+        const user = usersData.findIndex((user) => user.email === email)
 
         // Remove user
         usersData.splice(user, 1)
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-            res.json({ message: "User Removed!" })
+           return res.json({ message: "User Removed!" })
         }
         catch (error) {
-            res.json({ error: error.message })
+           return res.json({ error: error.message })
         }
     }
     catch (error) {
-        res.json({ error: error.message })
+       return res.json({ error: error.message })
     }
 })
 
