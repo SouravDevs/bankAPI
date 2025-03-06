@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 router.post('/login', async (req, res) => {
     
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.headers;
         // Check existing user
     const user = usersData.find((user) => user.email === email)
 
