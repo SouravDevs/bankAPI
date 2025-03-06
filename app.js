@@ -6,7 +6,8 @@ const app = express();
 
 app.use(cors({
     
-        origin: "http://localhost:5173", // Specify your frontend URL
+        origin: "http://localhost:5173", 
+        origin: "https://my-bank-1234.netlify.app",// Specify your frontend URL
         credentials: true, // Allow cookies and authentication headers
       })
 );
