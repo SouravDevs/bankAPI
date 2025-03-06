@@ -1,89 +1,97 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import usersData from "../usersDB.json" with {type: 'json'};
 import { writeFile } from "node:fs/promises";
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.json({message: usersData})
+    res.json({ message: usersData })
 })
 
 router.post('/login', async (req, res) => {
-    
+
     try {
         const { email, password } = req.headers;
         // Check existing user
-    const user = usersData.find((user) => user.email === email)
+        const user = usersData.find((user) => user.email === email)
 
 
-    if (user) {
-        if (user.password === password) {
-           return res.json(user)
+        if (user) {
+            if (user.password === password) {
+                // Set user data in cookies
+                res.cookie("user", JSON.stringify(user), {
+                    httpOnly: true, // Prevent client-side access
+                    secure: true,   // Ensure secure cookies (use HTTPS)
+                    sameSite: "Strict", // Prevent CSRF attacks
+                    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 day
+                });
+                return res.status(201).json(user)
+            }
+            else {
+                return res.json({ message: "Invalid credentials" })
+            }
         }
+
         else {
-           return res.json({ message: "Invalid credentials" })
+            return res.json({ message: "Invalid credentials" })
         }
-    }
-
-    else {
-       return res.json({ message: "Invalid credentials" })
-    }
     } catch (error) {
-        return res.json({error: error.message})
+        return res.json({ error: error.message })
     }
 })
 
 router.post('/signup', async (req, res) => {
-    
-     try {
+
+    try {
         const { email } = req.headers;
         const { password } = req.headers;
-      
- 
+
+
         console.log(email, password);
- 
-     const accnum = () => Math.floor(999999999999 + Math.random() * 77777777777);
- 
-     // Check existing user
-     const user = usersData.find((user) => user.email === email)
- 
-     if (user) {
-         return res.json({ message: "User already exists!" })
-     }
- 
-     else {
-         usersData.push({
-             email,
-             password,
-             name: null,
-             accnum: accnum(),
-             balance: 0,
-             mpin: null,
-             phone: null,
-             transdetails: []
- 
-         })
 
-         const data = {email, password}
- 
-         try {
-             await writeFile("./usersDB.json", JSON.stringify(usersData))
-            return res.json(data)
-         } catch (error) {
-            return res.json({ error: error.message })
-         }
-     }
-    } 
-      catch (error) {
-        return res.json({error: error.message})
-     }
+        const accnum = () => Math.floor(999999999999 + Math.random() * 77777777777);
 
+        // Check existing user
+        const user = usersData.find((user) => user.email === email)
+
+        if (user) {
+            return res.json({ message: "User already exists!" })
+        }
+
+        else {
+            usersData.push({
+                email,
+                password,
+                name: null,
+                accnum: accnum(),
+                balance: 0,
+                mpin: null,
+                phone: null,
+                transdetails: []
+
+            })
+
+            const data = { email, password }
+
+            try {
+                await writeFile("./usersDB.json", JSON.stringify(usersData))
+                return res.json(data)
+            } catch (error) {
+                return res.json({ error: error.message })
+            }
+        }
     }
+    catch (error) {
+        return res.json({ error: error.message })
+    }
+
+}
 )
 
 router.patch('/transfer', async (req, res) => {
     try {
-       const {email, receiveuser, amount} = req.body;
+        const { email, receiveuser, amount } = req.body;
 
         // Find User
         const user = usersData.find((user) => user.email === email)
@@ -108,7 +116,7 @@ router.patch('/transfer', async (req, res) => {
                     return res.json({ message: "Money Transferred Successfull" })
                 }
                 catch (error) {
-                   return res.json({ error: error.message })
+                    return res.json({ error: error.message })
                 }
             }
             else {
@@ -117,18 +125,18 @@ router.patch('/transfer', async (req, res) => {
 
         }
         else {
-           return res.json({ message: "Invalid Username" })
+            return res.json({ message: "Invalid Username" })
         }
     }
 
     catch (error) {
-       return res.json({ error: error.message })
+        return res.json({ error: error.message })
     }
 })
 
 router.patch('/update/profile', async (req, res) => {
     try {
-        const { email, newname, newphone} = req.body;
+        const { email, newname, newphone } = req.body;
 
         // Find User
         const user = usersData.find((user) => user.email === email)
@@ -140,13 +148,13 @@ router.patch('/update/profile', async (req, res) => {
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-           return res.json({ message: "Profile Updated!" })
+            return res.json({ message: "Profile Updated!" })
         }
         catch (error) {
-           return res.json({ error: error.message })
+            return res.json({ error: error.message })
         }
     } catch (error) {
-       return res.json({ error: error.message })
+        return res.json({ error: error.message })
     }
 
 
@@ -154,7 +162,7 @@ router.patch('/update/profile', async (req, res) => {
 
 router.patch('/update/balance', async (req, res) => {
     try {
-       const { email, amount } = req.body;
+        const { email, amount } = req.body;
 
         // Find User
         const user = usersData.find((user) => user.email === email)
@@ -165,13 +173,13 @@ router.patch('/update/balance', async (req, res) => {
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-           return res.json({ message: "Balance Updated!" })
+            return res.json({ message: "Balance Updated!" })
         }
         catch (error) {
-           return res.json({ error: error.message })
+            return res.json({ error: error.message })
         }
     } catch (error) {
-       return res.json({ error: error.message })
+        return res.json({ error: error.message })
     }
 })
 
@@ -190,18 +198,18 @@ router.patch('/profile', async (req, res) => {
         user.mpin = Number(mpin)
         user.phone = phone
 
-        
+
 
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-           return res.json({ message: "Profile Created!" })
+            return res.json({ message: "Profile Created!" })
         }
         catch (error) {
-           return res.json({ error: error.message })
+            return res.json({ error: error.message })
         }
     } catch (error) {
-       return res.json({ error: error.message })
+        return res.json({ error: error.message })
     }
 
 
@@ -219,14 +227,14 @@ router.delete('/delete', async (req, res) => {
 
         try {
             await writeFile("./usersDB.json", JSON.stringify(usersData))
-           return res.json({ message: "User Removed!" })
+            return res.json({ message: "User Removed!" })
         }
         catch (error) {
-           return res.json({ error: error.message })
+            return res.json({ error: error.message })
         }
     }
     catch (error) {
-       return res.json({ error: error.message })
+        return res.json({ error: error.message })
     }
 })
 
