@@ -18,7 +18,7 @@ router.post('/login', async (req, res) => {
 
     if (user) {
         if (user.password === password) {
-           return res.json({ message: user })
+           return res.json(user)
         }
         else {
            return res.json({ message: "Invalid credentials" })
